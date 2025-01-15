@@ -1,4 +1,4 @@
-#Reminder Screen
+# Reminder Screen
 
 This is a project to use a ESP32-S3-Touch-LCD-7 as a reminder screen that can be updated with messages remotely.
 
