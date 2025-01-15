@@ -97,6 +97,8 @@ void setup()
     /* Add into panel */
     panel->addIOExpander(expander);
 
+    // panel->getBacklight()->setBrightness(50);
+
     /* Start panel */
     panel->begin();
 
@@ -118,6 +120,7 @@ void setup()
     /*Make a gradient*/
     lv_style_set_width(&style, 150);
     lv_style_set_height(&style, LV_SIZE_CONTENT);
+    // lv_style_set_text_font(&style, &lv_font_montserrat_48);
 
     lv_style_set_pad_ver(&style, 20);
     lv_style_set_pad_left(&style, 5);
@@ -134,13 +137,22 @@ void setup()
     lv_obj_set_size(obj, 700, 200);
 
     lv_label_set_text(label, "Connecting to Wifi");
-    // lv_obj_set_style_text_font(label, &arial70px, 0)
+    lv_obj_set_style_text_font(label, &lv_font_montserrat_48, 0);
     lv_obj_center(label);
 
     // Connecting to the wifi network.
     connect_to_wifi();
 
     lv_label_set_text(label, "Connected to Wifi");
+
+    // Putting the devices local ip address in the top left corner.
+    lv_obj_t * ip = lv_obj_create(lv_scr_act());
+    lv_obj_t * ip_label = lv_label_create(ip);
+    lv_obj_set_size(ip, 110, 55);
+    lv_obj_set_style_text_font(ip, &lv_font_montserrat_14, 0);
+
+    lv_label_set_text(ip_label, WiFi.localIP().toString().c_str());
+    lv_obj_center(ip_label);
 
     /* Release the mutex */
     lvgl_port_unlock();
