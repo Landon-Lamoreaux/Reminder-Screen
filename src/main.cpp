@@ -5,36 +5,10 @@
 #include <examples/lv_examples.h>
 #include "../lv_conf.h"
 #include <WiFiMulti.h>
-#include <SinricPro.h>
-#include <EEPROM.h>
-
-#define WIFI_SSID "TDS0277"
-#define WIFI_PASS "bgqp25thht"
+#include <Utility_Functions.hpp>
 
 ESP_Panel *panel = NULL;
 SemaphoreHandle_t lvgl_mux = NULL;
-
-WiFiMulti wifiMulti;
-
-// Extend IO Pin define
-#define TP_RST 1
-#define LCD_BL 2
-#define LCD_RST 3
-#define SD_CS 4
-#define USB_SEL 5
-
-// I2C Pin define
-#define I2C_MASTER_NUM 0
-#define I2C_MASTER_SDA_IO 8
-#define I2C_MASTER_SCL_IO 9
-
-/* LVGL porting configurations */
-#define LVGL_TICK_PERIOD_MS     (2)
-#define LVGL_TASK_MAX_DELAY_MS  (500)
-#define LVGL_TASK_MIN_DELAY_MS  (1)
-#define LVGL_TASK_STACK_SIZE    (4 * 1024)
-#define LVGL_TASK_PRIORITY      (2)
-#define LVGL_BUF_SIZE           (ESP_PANEL_LCD_H_RES * 20)
 
 /* Display flushing */
 void lvgl_port_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
@@ -74,19 +48,6 @@ void lvgl_port_task(void *arg)
     }
 }
 
-void connect_to_wifi()
-{
-    wifiMulti.addAP(WIFI_SSID, WIFI_PASS);
-
-    while (wifiMulti.run() != WL_CONNECTED)
-    {
-        delay(100);
-        Serial.println("Connecting to Wifi.");
-    }
-    WiFi.setHostname("Reminder Screen.");
-    Serial.println("Connected to Wifi");
-    Serial.println(WiFi.localIP());
-}
 
 void setup()
 {
@@ -105,6 +66,7 @@ void setup()
 
      /* Initialize LVGL buffers */
     static lv_disp_draw_buf_t draw_buf;
+
     /* Using double buffers is more faster than single buffer */
     /* Using internal SRAM is more fast than PSRAM (Note: Memory allocated using `malloc` may be located in PSRAM.) */
     uint8_t *buf = (uint8_t *)heap_caps_calloc(1, LVGL_BUF_SIZE * sizeof(lv_color_t), MALLOC_CAP_INTERNAL);
@@ -175,23 +137,13 @@ void setup()
     // lv_obj_set_style_text_font(label, &arial70px, 0)
     lv_obj_center(label);
 
+    // Connecting to the wifi network.
     connect_to_wifi();
 
     lv_label_set_text(label, "Connected to Wifi");
 
     /* Release the mutex */
     lvgl_port_unlock();
-
-    // Serial.println("Draw color bar from top to bottom, the order is B - G - R");
-    // uint16_t line_per_bar = ESP_PANEL_LCD_V_RES / ESP_PANEL_LCD_COLOR_BITS;
-    // uint16_t *color = (uint16_t *)calloc(1, line_per_bar * ESP_PANEL_LCD_H_RES * ESP_PANEL_LCD_COLOR_BITS / 8);
-    // for (int j = 0; j < ESP_PANEL_LCD_COLOR_BITS; j++) {
-    //     for (int i = 0; i < line_per_bar * ESP_PANEL_LCD_H_RES; i++) {
-    //         color[i] = 1ULL << j;
-    //     }
-    //     panel->getLcd()->drawBitmap(0, j * line_per_bar, ESP_PANEL_LCD_H_RES, (j + 1) * line_per_bar, color);
-    // }
-    // free(color);
 
     Serial.println("Setup done");
 }
